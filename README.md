@@ -23,7 +23,7 @@ This project models how satellites gradually lose altitude over time, focusing o
 
 ## Example Output
 
-![Decay curve](img/altitude_vs_time.png)
+(yet to add)
 
 ## Future Ideas
 
