@@ -1,0 +1,56 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Constants
+R_earth = 6371e3  # Earth radius in meters
+mu = 3.986e14     # Earth gravitational parameter, m^3/s^2
+Cd = 2.2          # Drag coefficient
+A = 4.0           # Cross-sectional area (m^2)
+m = 1120          # Mass of satellite (kg)
+
+# Atmospheric density model (simplified exponential)
+def rho(h):
+    return 1.225 * np.exp(-h / 8500)
+
+# Simulation parameters
+dt = 60  # Time step in seconds
+t_max = 365 * 24 * 3600  # Simulate 1 year (seconds)
+
+# Initial conditions
+h = 250e3  # Initial altitude (m)
+r = R_earth + h  # Initial orbital radius (m)
+v = np.sqrt(mu / r)  # Initial orbital velocity (m/s)
+E = -mu / (2 * r)  # Specific orbital energy (J/kg)
+
+t = 0
+time = []
+altitude = []
+
+while h > 120e3 and t < t_max:
+    density = rho(h)
+    drag_accel = 0.5 * density * v**2 * Cd * A / m  # acceleration due to drag (m/s^2)
+    F_drag = drag_accel * m  # drag force (N)
+    work_drag = F_drag * v * dt  # work done by drag = energy lost (J)
+
+    E_new = E - work_drag / m  # update specific orbital energy (J/kg)
+    if E_new >= 0:  # if energy becomes non-negative, orbit breaks down
+        break
+
+    r = -mu / (2 * E_new)  # new orbital radius (m)
+    v = np.sqrt(mu / r)    # new orbital velocity (m/s)
+    h = r - R_earth        # new altitude (m)
+
+    time.append(t / 3600 / 24)  # time in days
+    altitude.append(h / 1000)   # altitude in km
+
+    E = E_new
+    t += dt
+
+# Plotting orbital decay
+plt.plot(time, altitude)
+plt.title("Orbital Decay Over Time (Improved Model)")
+plt.xlabel("Time (days)")
+plt.ylabel("Altitude (km)")
+plt.grid(True)
+plt.show()
+
